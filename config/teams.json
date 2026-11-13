@@ -1,0 +1,23 @@
+{
+  "seasonId": 201068,
+  "season": "2026/27",
+  "clubs": {
+    "haram": {"name": "Haram HK", "id": 60996},
+    "skodje": {"name": "Skodje IL", "id": 678493},
+    "vestnes-varfjell": {"name": "Vestnes Varfjell", "id": 60997},
+    "spjelkavik": {"name": "Spjelkavik IL", "id": 60971}
+  },
+  "teams": {
+    "858818": {"club": "haram", "class": "J14"},
+    "682485": {"club": "haram", "class": "J14"},
+    "224302": {"club": "haram", "class": "Kvinner"},
+    "968485": {"club": "skodje", "class": "G14"},
+    "997896": {"club": "skodje", "class": "G16"},
+    "1030050": {"club": "skodje", "class": "J14"},
+    "746228": {"club": "skodje", "class": "J16"},
+    "583022": {"club": "vestnes-varfjell", "class": "G14"},
+    "558634": {"club": "vestnes-varfjell", "class": "J14"},
+    "583021": {"club": "vestnes-varfjell", "class": "Kvinner"},
+    "559785": {"club": "spjelkavik", "class": "G16", "partners": ["haram", "skodje"]}
+  }
+}

@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="nn">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#F7F3E9">
+  <meta name="description" content="Kampoppsett, resultat og tabellar for lokale handballag i Bygdebladet-distriktet.">
+  <title>Bygdebladet Lokalhandball</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="shell masthead">
+      <a class="brand" href="#top" aria-label="Bygdebladet Lokalhandball"><strong>BYGDEBLADET</strong><span>LOKALHANDBALL</span></a>
+      <span id="lastUpdated" class="updated"></span>
+    </div>
+  </header>
+  <main class="shell" id="top">
+    <section class="hero" aria-labelledby="title">
+      <div class="hero-copy">
+        <p class="season" id="season"></p>
+        <h1 id="title">Lokal<span>handball</span></h1>
+        <p class="lede">Kampar, resultat og tabellar frå laga i Bygdebladet-distriktet.</p>
+        <a class="jump" href="#kampsenter">Gå til kampsenteret <span aria-hidden="true">↓</span></a>
+      </div>
+      <aside class="featured" id="featured" aria-label="Siste resultat"></aside>
+    </section>
+
+    <section class="scoreboard" id="kampsenter" aria-labelledby="scoreboardTitle">
+      <h2 id="scoreboardTitle">Kampsenter</h2>
+      <div class="toolbar">
+        <div class="views" role="group" aria-label="Vel vising">
+          <button type="button" data-view="results" aria-pressed="true">Resultat</button>
+          <button type="button" data-view="upcoming" aria-pressed="false">Kommande</button>
+          <button type="button" data-view="tables" aria-pressed="false">Tabellar</button>
+        </div>
+        <div class="filters">
+          <select id="clubFilter" aria-label="Klubb"><option value="">Alle klubbar</option></select>
+          <select id="classFilter" aria-label="Klasse"><option value="">Alle klassar</option></select>
+        </div>
+      </div>
+      <p id="status" role="status">Hentar kampdata …</p>
+      <div id="content"></div>
+    </section>
+  </main>
+  <footer><div class="shell footer"><strong>BYGDEBLADET LOKALHANDBALL</strong><span>Kjelde <a href="https://www.handball.no/">Norges Håndballforbund</a></span></div></footer>
+  <dialog id="matchDialog" aria-labelledby="dialogTitle">
+    <form method="dialog"><button class="dialog-close" aria-label="Lukk">×</button></form>
+    <div id="dialogContent"></div>
+  </dialog>
+</body>
+</html>

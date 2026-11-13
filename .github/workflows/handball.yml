@@ -1,0 +1,80 @@
+name: Oppdater og publiser lokalhandball
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '7,22,37,52 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: handball-pages
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      publish: ${{ steps.sync.outputs.publish }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Hent kampdata
+        id: sync
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          if [ "$EVENT_NAME" = "schedule" ]; then
+            python scripts/sync.py
+          else
+            python scripts/sync.py --force
+          fi
+          changed=false
+          if ! git diff --quiet -- data/handball.json; then
+            changed=true
+          fi
+          git add data/handball.json data/sync-state.json
+          if ! git diff --cached --quiet; then
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git commit -m 'Oppdater handballdata frå NHF'
+            git push origin HEAD:main
+          fi
+          if [ "$changed" = true ] || [ "$EVENT_NAME" != "schedule" ]; then
+            echo 'publish=true' >> "$GITHUB_OUTPUT"
+          fi
+      - name: Klargjer nettsida
+        if: steps.sync.outputs.publish == 'true'
+        run: |
+          mkdir -p _site/data
+          cp index.html app.js styles.css embed-host.js _site/
+          cp -R assets _site/
+          cp data/handball.json _site/data/
+      - name: Last opp nettsida
+        if: steps.sync.outputs.publish == 'true'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: sync
+    if: needs.sync.outputs.publish == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/configure-pages@v5
+      - name: Publiser på GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
