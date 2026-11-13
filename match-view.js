@@ -71,7 +71,7 @@ function reportPanel(match, details, pending) {
     const article = node('article', 'match-report');
     article.append(node('p', 'report-lead', match.report?.lead || lead));
     for (const paragraph of match.report?.paragraphs || []) article.append(node('p', '', paragraph));
-    article.append(node('p', 'match-note', 'Referatet er laga på grunnlag av dei registrerte kampdataa frå NHF.'));
+    article.append(node('p', 'match-note', 'Referatet er laga på grunnlag av offentlege kampdata. Informasjonen kan vere mangelfull, og kampbiletet blir ikkje skildra utover det opplysningane gir grunnlag for.'));
     report.append(article);
   }
   const timeline = timelineSection(match, details, pending);
