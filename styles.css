@@ -44,6 +44,9 @@ h1 span { color: var(--red); }
 .feature-score { align-self: center; color: inherit; font-size: clamp(1.75rem, 4.2vw, 3.35rem); line-height: 1; white-space: nowrap; font-weight: 900; letter-spacing: -.06em; }
 .crest { display: inline-grid; place-items: center; width: 34px; height: 34px; flex: 0 0 auto; border-radius: 50%; color: #35302b; background: #f2ece1; font-size: .63rem; font-weight: 900; }
 .crest img { width: 77%; height: 77%; object-fit: contain; }
+.crest img[src$="/elverum.png"] { padding: 2px; border-radius: 50%; background: #161616; }
+.crest.crest-pair { display: inline-flex; justify-content: center; gap: 2%; }
+.crest-pair img { width: 44%; height: 70%; }
 .duel .crest { width: 56px; height: 56px; font-size: .82rem; }
 .photo-banner { position: relative; isolation: isolate; overflow: hidden; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 24px; margin-bottom: 48px; padding: 25px 29px; border-radius: 20px; background: linear-gradient(115deg, #d81d1e, #ad1015); box-shadow: 0 20px 50px #d81d1e21; color: white; }
 .photo-banner::after { position: absolute; z-index: -1; top: 50%; right: 12%; width: 245px; aspect-ratio: 1; border: 33px solid #ffffff0e; border-radius: 50%; transform: translateY(-50%); content: ''; }

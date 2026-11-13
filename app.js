@@ -47,16 +47,92 @@ function link(label, path, className) {
   return el;
 }
 
+const clubCrests = new Map([
+  ['aker topphåndball', 'aker'],
+  ['aksla', 'aksla'],
+  ['alta', 'alta'],
+  ['aure il', 'aure'],
+  ['bergsøy', 'bergsoy'],
+  ['blindheim', 'blindheim'],
+  ['bodø', 'bodo'],
+  ['bul', 'bossekop'],
+  ['bækkelaget', 'baekkelaget'],
+  ['charlottenlund', 'charlottenlund'],
+  ['ellingsøy', 'ellingsoy'],
+  ['elnesvågen', 'elnesvagen'],
+  ['elverum', 'elverum'],
+  ['fana', 'fana'],
+  ['godøy', 'godoy'],
+  ['harstad', 'harstad'],
+  ['hk-72 sande', 'hk72-sande'],
+  ['hødd', 'hodd'],
+  ['isfjorden', 'isfjorden'],
+  ['kristiansund', 'kristiansund'],
+  ['kråkerøy', 'krakeroy'],
+  ['kvæfjord', 'kvaefjord'],
+  ['langevåg', 'langevag'],
+  ['midsund', 'midsund'],
+  ['molde', 'molde-hk'],
+  ['molde hk', 'molde-hk'],
+  ['mosjøen', 'mosjoen'],
+  ['ntnui-ålesund', 'ntnuia'],
+  ['randesund', 'randesund'],
+  ['ranheim', 'ranheim'],
+  ['rival', 'rival'],
+  ['rollon', 'rollon'],
+  ['sandnes', 'sandnes'],
+  ['sif/hessa il', 'sif-hessa'],
+  ['sk rival', 'rival'],
+  ['ski', 'ski'],
+  ['skogn', 'skogn'],
+  ['skåla', 'skala'],
+  ['spjelkavik', 'spjelkavik'],
+  ['spjelkavik il', 'spjelkavik'],
+  ['stranda', 'stranda'],
+  ['strindheim', 'strindheim'],
+  ['sula', 'sula'],
+  ['sula sk', 'sula'],
+  ['sykkylven', 'sykkylven'],
+  ['tiller', 'tiller'],
+  ['tingvoll idrettslag', 'tingvoll'],
+  ['tromsø', 'tromso'],
+  ['træff', 'traeff'],
+  ['valder', 'valder'],
+  ['vikhammer', 'vikhammer'],
+  ['viking tif', 'viking-tif'],
+  ['volda', 'volda'],
+  ['åheim', 'aaheim'],
+  ['åndalsnes', 'andalsnes'],
+  ['ørsta', 'orsta'],
+]);
+
+function crestFiles(team) {
+  if (team.club && data.clubs[team.club]) return [team.club];
+  const name = team.name.toLowerCase().trim().replace(/\s+\d+$/, '').replace(/\s*\/\s*/g, '/');
+  const club = clubCrests.get(name);
+  if (club) return [club];
+  const partners = name.split('/').map(part => clubCrests.get(part));
+  return partners.every(Boolean) ? partners : [];
+}
+
 function crest(team) {
   const initials = team.name.split(/[^\p{L}]+/u).filter(Boolean).map(word => word[0]).join('').slice(0, 3).toUpperCase();
   const badge = node('span', team.club ? 'crest local-crest' : 'crest', initials);
   badge.setAttribute('aria-hidden', 'true');
-  if (team.club && data.clubs[team.club]) {
+  const files = crestFiles(team);
+  if (!files.length) return badge;
+  badge.textContent = '';
+  badge.classList.toggle('crest-pair', files.length > 1);
+  for (const file of files) {
     const img = node('img');
     img.alt = '';
-    img.src = `assets/team-logos/${team.club}.png`;
-    img.addEventListener('error', () => { badge.textContent = initials; }, { once: true });
-    badge.replaceChildren(img);
+    img.addEventListener('error', () => {
+      img.remove();
+      badge.classList.toggle('crest-pair', badge.childElementCount > 1);
+      if (!badge.childElementCount) badge.textContent = initials;
+    }, { once: true });
+    badge.append(img);
+    img.src = `assets/team-logos/${file}.png`;
   }
   return badge;
 }
