@@ -3,6 +3,7 @@
 const byId = id => document.getElementById(id);
 const norway = 'Europe/Oslo';
 const dateFormat = new Intl.DateTimeFormat('nn-NO', { weekday: 'long', day: 'numeric', month: 'long', timeZone: norway });
+const fullDateFormat = new Intl.DateTimeFormat('nn-NO', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: norway });
 const shortDate = new Intl.DateTimeFormat('nn-NO', { day: 'numeric', month: 'short', timeZone: norway });
 const updatedFormat = new Intl.DateTimeFormat('nn-NO', { dateStyle: 'short', timeStyle: 'short', timeZone: norway });
 const today = new Intl.DateTimeFormat('sv-SE', { timeZone: norway }).format(new Date());
@@ -58,15 +59,33 @@ function crest(team) {
   return badge;
 }
 
-function duel(match) {
+function duel(match, matchDialog = false) {
   const row = node('span', 'duel');
   const teamLabel = team => {
     const label = node('span', 'team');
     label.append(crest(team), node('span', '', team.name));
     return label;
   };
-  row.append(teamLabel(match.home), node('strong', 'feature-score', match.score?.join('–') || '–'), teamLabel(match.away));
+  const score = node('strong', 'feature-score', match.score?.join('–') || '–');
+  if (matchDialog) {
+    const result = node('span', 'dialog-result');
+    result.append(node('span', 'dialog-result-label', match.walkover ? 'Walkover' : match.score ? 'Slutt' : 'Kommande'), score);
+    const outcome = matchOutcome(match);
+    if (outcome) result.append(outcomeBadge(outcome));
+    row.append(teamLabel(match.home), result, teamLabel(match.away));
+  } else {
+    row.append(teamLabel(match.home), score, teamLabel(match.away));
+  }
   return row;
+}
+
+function matchAction(outcome) {
+  const side = node('span', 'match-side');
+  if (outcome) side.append(outcomeBadge(outcome));
+  const arrow = node('span', 'arrow', '›');
+  arrow.setAttribute('aria-hidden', 'true');
+  side.append(arrow);
+  return side;
 }
 
 function matchButton(match) {
@@ -83,12 +102,7 @@ function matchButton(match) {
     line.append(crest(team), node('span', '', team.name), node('strong', '', match.score?.[i] ?? ''));
     teams.append(line);
   });
-  const arrow = node('span', 'arrow', '›');
-  arrow.setAttribute('aria-hidden', 'true');
-  const side = node('span', 'match-side');
-  if (outcome) side.append(outcomeBadge(outcome));
-  side.append(arrow);
-  button.append(info, teams, side);
+  button.append(info, teams, matchAction(outcome));
   return button;
 }
 
@@ -107,9 +121,7 @@ function showFeatured() {
   if (latest.date) date.dateTime = latest.date;
   heading.append(node('strong', '', 'Siste resultat'), date);
   const footer = node('span', 'feature-foot');
-  footer.append(node('span', '', latest.competition));
-  const outcome = matchOutcome(latest);
-  if (outcome) footer.append(outcomeBadge(outcome));
+  footer.append(node('span', '', latest.competition), matchAction(matchOutcome(latest)));
   button.append(heading, duel(latest), footer);
   featured.append(button);
 }
@@ -149,11 +161,19 @@ function tellParent(type) {
 
 function openMatch(match) {
   const heading = node('header', 'dialog-head');
-  const title = node('h2', '', match.competition);
+  const competition = node('p', 'dialog-competition');
+  competition.append(node('strong', '', match.class), node('span', '', match.competition));
+  const title = node('h2', '', matchHeadline(match));
   title.id = 'dialogTitle';
-  heading.append(title, duel(match));
-  const outcome = matchOutcome(match);
-  if (outcome) heading.append(outcomeBadge(outcome));
+  const facts = node('ul', 'dialog-meta');
+  const date = node(match.date ? 'time' : 'span', '', dateLabel(match.date, fullDateFormat));
+  if (match.date) date.dateTime = match.date;
+  const dateItem = node('li');
+  dateItem.append(date);
+  facts.append(dateItem);
+  if (match.start) facts.append(node('li', '', match.start));
+  if (match.venue) facts.append(node('li', '', match.venue));
+  heading.append(competition, title, duel(match, true), facts);
   byId('dialogContent').replaceChildren(heading, ...matchTabs(match));
   byId('dialogContent').scrollTop = 0;
   dialog.showModal();
@@ -161,7 +181,16 @@ function openMatch(match) {
   tellParent('match-open');
 }
 
+let pressedBackdrop = false;
+dialog.addEventListener('pointerdown', event => {
+  pressedBackdrop = event.target === dialog;
+});
+dialog.addEventListener('click', event => {
+  if (pressedBackdrop && event.target === dialog) dialog.close();
+  pressedBackdrop = false;
+});
 dialog.addEventListener('close', () => {
+  pressedBackdrop = false;
   document.documentElement.classList.remove('match-modal-open', 'match-embedded-fullscreen');
   tellParent('match-close');
 });

@@ -34,6 +34,15 @@ function outcomeBadge(outcome) {
   return node('span', `outcome outcome-${outcome[0]}`, outcome[1]);
 }
 
+function matchHeadline(match) {
+  const { home, away, score, walkover } = match;
+  if (!score || walkover) return `${home.name} – ${away.name}`;
+  const [homeScore, awayScore] = score;
+  if (homeScore === awayScore) return `${home.name} og ${away.name} spelte ${score.join('–')}`;
+  return homeScore > awayScore ? `${home.name} vann ${homeScore}–${awayScore} mot ${away.name}` :
+    `${away.name} vann ${awayScore}–${homeScore} mot ${home.name}`;
+}
+
 function detailSection(title) {
   const section = node('section', 'match-section');
   section.append(node('h3', '', title));
@@ -53,16 +62,11 @@ function reportPanel(match, details, pending) {
   if (!match.score) {
     report.append(node('p', 'match-note', 'Kampen er ikkje ferdigspelt.'));
   } else {
-    const [homeScore, awayScore] = match.score;
-    const result = match.score.join('–');
     const home = match.home.name;
     const away = match.away.name;
-    let lead = `${home} og ${away} spelte ${result}.`;
-    if (homeScore !== awayScore) {
-      const [winner, loser, score] = homeScore > awayScore ? [home, away, result] : [away, home, `${awayScore}–${homeScore}`];
-      lead = `${winner} vann ${score} mot ${loser}.`;
-    }
-    if (match.walkover) lead = `NHF har registrert kampen mellom ${home} og ${away} som walkover med resultat ${result}.`;
+    const lead = match.walkover ?
+      `NHF har registrert kampen mellom ${home} og ${away} som walkover med resultat ${match.score.join('–')}.` :
+      `${matchHeadline(match)}.`;
     const article = node('article', 'match-report');
     article.append(node('p', 'report-lead', lead));
     if (details?.half) {
@@ -97,10 +101,9 @@ function reportPanel(match, details, pending) {
     item.append(node('dt', '', label), node('dd', '', value));
     list.append(item);
   }
-  facts.append(list, link('Sjå kampen hos NHF ↗', `kamp/?matchid=${match.id}`, 'nhf-link'));
-  panel.append(report);
+  facts.append(list);
+  panel.append(report, timeline, facts);
   if (match.score) panel.append(photoPanel(match));
-  panel.append(timeline, facts);
   return panel;
 }
 
@@ -197,8 +200,7 @@ function lineupCard(match, side, details) {
 }
 
 function photoPanel(match) {
-  const section = detailSection('Bilde frå kampen');
-  section.append(node('p', '', 'Har du bilde frå kampen? Send dei til redaksjonen.'));
+  const section = node('div', 'match-section photo-section');
   const url = new URL(photoForm);
   url.search = new URLSearchParams({ matchId: match.id, match: `${match.home.name} – ${match.away.name}`, matchDate: match.date || '' });
   const button = node('a', 'photo-submit', 'Send inn kampbilde ↗');
