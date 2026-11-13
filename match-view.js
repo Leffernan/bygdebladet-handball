@@ -35,6 +35,7 @@ function outcomeBadge(outcome) {
 }
 
 function matchHeadline(match) {
+  if (match.report) return match.report.title;
   const { home, away, score, walkover } = match;
   if (!score || walkover) return `${home.name} – ${away.name}`;
   const [homeScore, awayScore] = score;
@@ -68,23 +69,8 @@ function reportPanel(match, details, pending) {
       `NHF har registrert kampen mellom ${home} og ${away} som walkover med resultat ${match.score.join('–')}.` :
       `${matchHeadline(match)}.`;
     const article = node('article', 'match-report');
-    article.append(node('p', 'report-lead', lead));
-    if (details?.half) {
-      const [a, b] = details.half;
-      article.append(node('p', '', a === b ? `Det stod ${a}–${b} til pause.` :
-        a > b ? `${home} leia ${a}–${b} til pause.` : `${away} leia ${b}–${a} til pause.`));
-    }
-    const scorers = ['home', 'away'].flatMap(side => {
-      const players = details?.lineups[side] || [];
-      const goals = players.map(player => player.stats[0]);
-      const teamScore = match.score[side === 'home' ? 0 : 1];
-      if (goals.some(goal => goal == null) || goals.reduce((total, goal) => total + goal, 0) !== teamScore) return [];
-      const highest = Math.max(0, ...goals);
-      if (!highest) return [];
-      const names = players.filter(player => player.stats[0] === highest).map(player => player.name);
-      return [`${names.join(', ')} scora ${highest} mål ${names.length > 1 ? 'kvar ' : ''}for ${match[side].name}.`];
-    });
-    if (scorers.length) article.append(node('p', '', scorers.join(' ')));
+    article.append(node('p', 'report-lead', match.report?.lead || lead));
+    for (const paragraph of match.report?.paragraphs || []) article.append(node('p', '', paragraph));
     article.append(node('p', 'match-note', 'Referatet er laga på grunnlag av dei registrerte kampdataa frå NHF.'));
     report.append(article);
   }

@@ -93,6 +93,7 @@ function matchButton(match) {
   const button = node('button', outcome ? `match match-${outcome[0]}` : 'match');
   button.type = 'button';
   button.addEventListener('click', () => openMatch(match));
+  if (match.report) button.append(node('strong', 'match-headline', match.report.title));
   const info = node('span', 'match-info');
   info.append(node('strong', '', match.class), node('small', '', match.competition));
   if (!match.score && match.start) info.append(node('small', '', `Kl. ${match.start}`));
@@ -122,7 +123,9 @@ function showFeatured() {
   heading.append(node('strong', '', 'Siste resultat'), date);
   const footer = node('span', 'feature-foot');
   footer.append(node('span', '', latest.competition), matchAction(matchOutcome(latest)));
-  button.append(heading, duel(latest), footer);
+  button.append(heading);
+  if (latest.report) button.append(node('strong', 'feature-headline', latest.report.title));
+  button.append(duel(latest), footer);
   featured.append(button);
 }
 

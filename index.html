@@ -9,9 +9,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=kampvising">
-  <script src="match-view.js?v=kampvising" defer></script>
-  <script src="app.js?v=kampvising" defer></script>
+  <link rel="stylesheet" href="styles.css?v=kampreferat">
+  <script src="match-view.js?v=kampreferat" defer></script>
+  <script src="app.js?v=kampreferat" defer></script>
 </head>
 <body>
   <header class="site-header">
@@ -28,6 +28,23 @@
         <p class="lede">Kampar, resultat og tabellar frå laga i Bygdebladet-distriktet.</p>
       </div>
       <aside class="featured" id="featured" aria-label="Siste resultat"></aside>
+    </section>
+
+    <section class="photo-banner" aria-labelledby="photoBannerTitle">
+      <div class="photo-banner-icon" aria-hidden="true">
+        <svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="7" y="16" width="66" height="51" rx="12"/>
+          <path d="m24 16 6-9h20l6 9"/>
+          <circle cx="40" cy="42" r="13"/>
+          <circle cx="62" cy="27" r="3" fill="currentColor" stroke="none"/>
+        </svg>
+      </div>
+      <div class="photo-banner-copy">
+        <p class="photo-banner-kicker">Frå sidelinja til Bygdebladet</p>
+        <h2 id="photoBannerTitle">Har du bilde frå ein kamp?</h2>
+        <p>Foreldre, lagleiarar og klubbar: Hjelp oss å vise menneska bak resultata.</p>
+      </div>
+      <a class="photo-banner-button" href="https://tally.so/r/RWMgXj" target="_blank" rel="noopener">Send inn bilde <span aria-hidden="true">↗</span></a>
     </section>
 
     <section class="scoreboard" id="kampsenter" aria-labelledby="scoreboardTitle">
@@ -47,7 +64,7 @@
       <div id="content"></div>
     </section>
   </main>
-  <footer><div class="shell footer"><strong>BYGDEBLADET LOKALHANDBALL</strong><span>Kjelde <a href="https://www.handball.no/">Norges Håndballforbund</a></span></div></footer>
+  <footer><div class="shell footer"><strong>BYGDEBLADET LOKALHANDBALL</strong></div></footer>
   <dialog id="matchDialog" aria-labelledby="dialogTitle">
     <form method="dialog"><button class="dialog-close" aria-label="Lukk">×</button></form>
     <div id="dialogContent"></div>

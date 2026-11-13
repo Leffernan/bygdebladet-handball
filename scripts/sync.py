@@ -11,6 +11,7 @@ from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 from zoneinfo import ZoneInfo
 
+from editorial_reports import generate
 from match_details import refresh_matches
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -166,7 +167,7 @@ def main():
     now = datetime.now(OSLO)
     old_details = read(DETAILS, {})
     full = args.force or not old or old['season'] != config['season'] or state.get('fullDate') != now.date().isoformat()
-    games = {m['id']: m for m in old.get('matches', [])}
+    games = {m['id']: m.copy() for m in old.get('matches', [])}
     tables = old.get('tables', {})
     with ThreadPoolExecutor(max_workers=3) as pool:
         if full:
@@ -191,9 +192,16 @@ def main():
         details = refresh_matches(games, old_details, get, pool, now, daily=full, force=args.force)
     if details != old_details or not DETAILS.exists():
         save(DETAILS, details)
+    matches = sorted(games.values(), key=lambda m: (m['date'] or '9999-12-31', m['start'] or '24:00', m['id']))
+    for match in matches:
+        report = generate(match, details.get(str(match['id']), {}))
+        if report:
+            match['report'] = report
+        else:
+            match.pop('report', None)
     payload = {
         'season': config['season'], 'clubs': config['clubs'], 'trackedTeamIds': [int(t) for t in config['teams']],
-        'matches': sorted(games.values(), key=lambda m: (m['date'] or '9999-12-31', m['start'] or '24:00', m['id'])),
+        'matches': matches,
         'tables': tables
     }
     if payload != {k: v for k, v in old.items() if k != 'updatedAt'}:
