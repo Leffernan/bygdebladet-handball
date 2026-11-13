@@ -11,11 +11,14 @@ from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 from zoneinfo import ZoneInfo
 
+from match_details import refresh_matches
+
 ROOT = Path(__file__).resolve().parents[1]
 BASE = 'https://www.handball.no'
 OSLO = ZoneInfo('Europe/Oslo')
 DATA = ROOT / 'data' / 'handball.json'
 STATE = ROOT / 'data' / 'sync-state.json'
+DETAILS = ROOT / 'data' / 'match-details.json'
 
 
 class StandingsParser(HTMLParser):
@@ -161,6 +164,7 @@ def main():
     old = read(DATA, {})
     state = read(STATE, {})
     now = datetime.now(OSLO)
+    old_details = read(DETAILS, {})
     full = args.force or not old or old['season'] != config['season'] or state.get('fullDate') != now.date().isoformat()
     games = {m['id']: m for m in old.get('matches', [])}
     tables = old.get('tables', {})
@@ -178,15 +182,15 @@ def main():
             state['fullDate'] = now.date().isoformat()
         else:
             ids = sorted({str(m['competitionId']) for m in games.values() if due(m, now)})
-            if not ids:
-                print('Ingen kampar venta ferdig.')
-                return
             for competition_id, rows in zip(ids, pool.map(competition_fixtures, ids)):
                 updates = normalize(rows, config)
                 if not updates:
                     raise ValueError(f'Ingen lokale kampar i turnering {competition_id}')
                 games.update(updates)
             tables.update(zip(ids, pool.map(standings, ids)))
+        details = refresh_matches(games, old_details, get, pool, now, daily=full, force=args.force)
+    if details != old_details or not DETAILS.exists():
+        save(DETAILS, details)
     payload = {
         'season': config['season'], 'clubs': config['clubs'], 'trackedTeamIds': [int(t) for t in config['teams']],
         'matches': sorted(games.values(), key=lambda m: (m['date'] or '9999-12-31', m['start'] or '24:00', m['id'])),
@@ -195,7 +199,7 @@ def main():
     if payload != {k: v for k, v in old.items() if k != 'updatedAt'}:
         save(DATA, {**payload, 'updatedAt': now.isoformat(timespec='minutes')})
     save(STATE, state)
-    print(f'{len(games)} lokale kampar og {len(ids)} oppdaterte turneringar.')
+    print(f'{len(games)} lokale kampar, {len(ids)} oppdaterte turneringar og {len(details)} kampdetaljar.')
 
 
 if __name__ == '__main__':

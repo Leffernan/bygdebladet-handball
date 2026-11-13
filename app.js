@@ -46,7 +46,7 @@ function link(label, path, className) {
 
 function crest(team) {
   const initials = team.name.split(/[^\p{L}]+/u).filter(Boolean).map(word => word[0]).join('').slice(0, 3).toUpperCase();
-  const badge = node('span', 'crest', initials);
+  const badge = node('span', team.club ? 'crest local-crest' : 'crest', initials);
   badge.setAttribute('aria-hidden', 'true');
   if (team.club && data.clubs[team.club]) {
     const img = node('img');
@@ -70,7 +70,8 @@ function duel(match) {
 }
 
 function matchButton(match) {
-  const button = node('button', 'match');
+  const outcome = matchOutcome(match);
+  const button = node('button', outcome ? `match match-${outcome[0]}` : 'match');
   button.type = 'button';
   button.addEventListener('click', () => openMatch(match));
   const info = node('span', 'match-info');
@@ -84,7 +85,10 @@ function matchButton(match) {
   });
   const arrow = node('span', 'arrow', '›');
   arrow.setAttribute('aria-hidden', 'true');
-  button.append(info, teams, arrow);
+  const side = node('span', 'match-side');
+  if (outcome) side.append(outcomeBadge(outcome));
+  side.append(arrow);
+  button.append(info, teams, side);
   return button;
 }
 
@@ -103,12 +107,14 @@ function showFeatured() {
   if (latest.date) date.dateTime = latest.date;
   heading.append(node('strong', '', 'Siste resultat'), date);
   const footer = node('span', 'feature-foot');
-  footer.append(node('span', '', latest.competition), node('span', '', 'Sjå kampen ›'));
+  footer.append(node('span', '', latest.competition));
+  const outcome = matchOutcome(latest);
+  if (outcome) footer.append(outcomeBadge(outcome));
   button.append(heading, duel(latest), footer);
   featured.append(button);
 }
 
-function tableBlock(id, name, open = false) {
+function tableBlock(id, name, open = false, highlights = data.trackedTeamIds) {
   const rows = data.tables[String(id)];
   if (!rows?.length) return null;
   const block = node('details', 'standing');
@@ -126,7 +132,7 @@ function tableBlock(id, name, open = false) {
   const body = table.createTBody();
   rows.forEach(row => {
     const tr = body.insertRow();
-    if (data.trackedTeamIds.includes(row.teamId)) tr.className = 'tracked';
+    if (highlights.includes(row.teamId)) tr.className = 'tracked';
     const goals = row.goalsFor == null || row.goalsAgainst == null ? '–' : `${row.goalsFor}–${row.goalsAgainst}`;
     [row.position, row.name, row.played, row.wins, row.draws, row.losses, goals, row.points].forEach(value => {
       tr.append(node('td', '', value ?? '–'));
@@ -146,14 +152,10 @@ function openMatch(match) {
   const title = node('h2', '', match.competition);
   title.id = 'dialogTitle';
   heading.append(title, duel(match));
-  const body = node('div', 'dialog-body');
-  body.append(node('p', '', [dateLabel(match.date), match.start && `kl. ${match.start}`, match.venue].filter(Boolean).join(' · ')));
-  if (match.walkover) body.append(node('p', '', 'Walkover'));
-  body.append(node('p'));
-  body.lastElementChild.append(link('Sjå kampen hos NHF ↗', `kamp/?matchid=${match.id}`, 'nhf-link'));
-  const standings = tableBlock(match.competitionId, 'Tabell');
-  if (standings) body.append(standings);
-  byId('dialogContent').replaceChildren(heading, body);
+  const outcome = matchOutcome(match);
+  if (outcome) heading.append(outcomeBadge(outcome));
+  byId('dialogContent').replaceChildren(heading, ...matchTabs(match));
+  byId('dialogContent').scrollTop = 0;
   dialog.showModal();
   document.documentElement.classList.add('match-modal-open');
   tellParent('match-open');

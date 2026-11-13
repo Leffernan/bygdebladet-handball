@@ -37,10 +37,10 @@ jobs:
             python scripts/sync.py --force
           fi
           changed=false
-          if ! git diff --quiet -- data/handball.json; then
+          if ! git diff --quiet -- data/handball.json data/match-details.json; then
             changed=true
           fi
-          git add data/handball.json data/sync-state.json
+          git add data/handball.json data/sync-state.json data/match-details.json
           if ! git diff --cached --quiet; then
             git config user.name 'github-actions[bot]'
             git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
@@ -54,9 +54,9 @@ jobs:
         if: steps.sync.outputs.publish == 'true'
         run: |
           mkdir -p _site/data
-          cp index.html app.js styles.css embed-host.js _site/
+          cp index.html app.js match-view.js styles.css embed-host.js _site/
           cp -R assets _site/
-          cp data/handball.json _site/data/
+          cp data/handball.json data/match-details.json _site/data/
       - name: Last opp nettsida
         if: steps.sync.outputs.publish == 'true'
         uses: actions/upload-pages-artifact@v3
