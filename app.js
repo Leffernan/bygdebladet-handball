@@ -14,6 +14,8 @@ const status = byId('status');
 const dialog = byId('matchDialog');
 const views = [...document.querySelectorAll('[data-view]')];
 const source = 'bygdebladet-lokalhandball-v1';
+const isEmbedded = window.parent !== window;
+document.documentElement.classList.toggle('match-embedded', isEmbedded);
 const newspaperOrigins = new Set(['https://bygdebladet.com', 'https://www.bygdebladet.com']);
 const parentOrigin = (() => {
   try {
@@ -159,7 +161,7 @@ function tableBlock(id, name, open = false, highlights = data.trackedTeamIds) {
 }
 
 function tellParent(type) {
-  if (window.parent !== window && parentOrigin) window.parent.postMessage({ source, type }, parentOrigin);
+  if (isEmbedded && parentOrigin) window.parent.postMessage({ source, type }, parentOrigin);
 }
 
 function openMatch(match) {

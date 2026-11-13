@@ -85,7 +85,8 @@ tr.tracked { background: #f9ebea; }
 footer { border-top: 1px solid var(--line); }
 .footer { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 10px; padding: 22px 0; font-size: .8rem; }
 dialog { width: min(610px, calc(100% - 26px)); max-height: 90dvh; padding: 0; border: 0; border-radius: 16px; background: var(--white); color: var(--ink); }
-dialog::backdrop { background: rgb(22 22 22 / 32%); }
+dialog::backdrop { background: #151515ba; }
+html.match-embedded dialog::backdrop { background: rgb(22 22 22 / 32%); }
 html.match-modal-open { overflow: hidden; }
 html.match-embedded-fullscreen { background: var(--paper); }
 html.match-embedded-fullscreen body > :not(dialog) { visibility: hidden; }
